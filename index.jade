@@ -2,9 +2,19 @@ script(src='./lib/jquery-3.1.1.slim.min.js')
 script(src='./lib/fabric.js')
 script(src='./lib/highcharts.js')
 
+style.
+    canvas {
+        border: solid 1px black;
+        /* width: 400px;
+        height: 400px; */
+        display: inline-block;
+    }
+
 h1 Problem 2: Modelling a differentially steered robot
 canvas#cvs
+canvas#chart(width='400', height='400')
+
 button#reset Randomize
 
-
 script(src='./main.js')
+script(src='./charting.js')

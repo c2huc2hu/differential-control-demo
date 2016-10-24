@@ -1,48 +1,61 @@
-h = 0.1
-L = 10
+h = 0.001
+L = 0.1
 
 class Robot
-	constructor: (@L, @canvasObj) ->
-		@randomizePosition()
-		@render()
-	randomizePosition: ->
-		@x = Math.random() * 600
-		@y = Math.random() * 400
-		@theta = Math.random() * 2 * Math.PI
-	update: (speed, angle) ->
-		@x += speed * Math.cos(@theta) * Math.cos(angle) * h
-		@y += speed * Math.sin(@theta) * Math.cos(angle) * h
-		@theta += Math.atan2((Math.sin speed * angle), @L) * h
-	render: ->
-		@canvasObj
-			.setAngle(@theta * 180 / Math.PI)
-			.set {originX: 'center', originY: 'center', left: @x, top: @y}
-		canvas.renderAll()
+    constructor: (@L, @canvasObj) ->
+        @randomizePosition()
+        @render()
+    randomizePosition: ->
+        @x = Math.random() * 4 - 2
+        @y = Math.random() * 4 - 2
+        @theta = Math.random() * 2 * Math.PI
+    update: (speed, angle) ->
+        # console.log @x, @y, @theta
+        @x += speed * Math.cos(@theta) * h
+        @y += speed * Math.sin(@theta) * h
+        @theta += angle
+    render: ->
+        drawLeft = @x * 100 + 200
+        drawTop = @y * 100 + 200
+        @canvasObj
+            .setAngle(@theta * 180 / Math.PI)
+            .set {originX: 'center', originY: 'center', left: drawLeft, top: drawTop}
+        canvas.renderAll()
 
 class ControlledRobot extends Robot
-	constructor: (@L, @canvasObj, @distControl, @targetControl, @alignControl) ->
-		super @L, @canvasObj
-	update: (goalX, goalY, goalTheta) ->
-		# want to regulate rho, alpha and beta to zero.
-		dist = Math.sqrt((@x-goalX)**2+(@y-goalY)**2) # rho
-		directionToGoal = Math.atan2 (goalY-@y), (goalX-@x)
-		targetHeading = directionToGoal - @theta # alpha
-		alignHeading = directionToGoal - goalTheta # beta
-		super @distControl * dist, @targetControl * targetHeading + @alignControl * alignHeading
+    constructor: (@L, @canvasObj, @distControl, @targetControl, @alignControl) ->
+        @history = []
+        super @L, @canvasObj
+    update: (goalX, goalY, goalTheta) ->
+        # want to regulate rho, alpha and beta to zero.
+        dist = Math.sqrt((@x-goalX)**2+(@y-goalY)**2) # rho
+        directionToGoal = Math.atan (goalY-@y) / (goalX-@x)
+        targetHeading = directionToGoal - @theta # alpha
+        alignHeading = directionToGoal - goalTheta # beta
+
+        @history.push {@x, @y, @theta}
+        super @distControl * dist, @targetControl * targetHeading + @alignControl * alignHeading
 
 canvas = new fabric.Canvas('cvs')
-	.setHeight 400
-	.setWidth 600
+    .setHeight 400
+    .setWidth 400
+
+target =
+    x: 0
+    y: 0
+    angle: -Math.PI / 2
 
 rect = new fabric.Rect({width:30, height: 20})
-target = new fabric.Circle({left: 300-10, top: 200-10, radius: 10, fill: 'crimson'})
-target2 = new fabric.Circle({left: 300-5, top: 200-5, radius: 5, fill: 'black'})
-canvas.add(rect, target, target2)
-robot = new ControlledRobot(1, rect, 0.05, 0.1, 0.1)
+eye = new fabric.Circle({left: target.x*100+200-10, top: target.y*100+200-10, radius: 10, fill: 'crimson'})
+eye2 = new fabric.Circle({left: target.x*100+200-5, top: target.y*100+200-5, radius: 5, fill: 'black'})
+canvas.add(rect, eye, eye2)
+robot = new ControlledRobot(L, rect, 5, 0.1, 0.1)
 
 setInterval ->
-	robot.update(300, 200, -Math.PI / 2)
-	robot.render()
+    robot.update(target.x, target.y, target.angle)
+    robot.render()
 , 16
 
 $('#reset').click -> robot.randomizePosition()
+
+window.robot = robot
