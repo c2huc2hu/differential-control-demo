@@ -63,7 +63,10 @@
     ControlledRobot.prototype.update = function(goalX, goalY, goalTheta) {
       var alignHeading, directionToGoal, dist, targetHeading;
       dist = Math.sqrt(Math.pow(this.x - goalX, 2) + Math.pow(this.y - goalY, 2));
-      directionToGoal = Math.atan((goalY - this.y) / (goalX - this.x));
+      if (dist > 100) {
+        console.log(dist);
+      }
+      directionToGoal = Math.atan2(goalY - this.y, goalX - this.x);
       targetHeading = directionToGoal - this.theta;
       alignHeading = directionToGoal - goalTheta;
       this.history.push({
@@ -116,16 +119,9 @@
 
   canvas.add(rect, eye, eye2);
 
-  robot = new ControlledRobot(L, rect, 5, 0.1, 0.1);
+  robot = new ControlledRobot(L, rect, 5, 0.2, 0.1);
 
   setInterval(function() {
-    if (headToOrigin) {
-      robot.update(target.x, target.y, target.angle);
-    } else {
-      robot.followPath(function(x) {
-        return 0.5 * Math.sin(x);
-      });
-    }
     return robot.render();
   }, 16);
 
@@ -138,5 +134,15 @@
   });
 
   window.robot = robot;
+
+  setInterval(function() {
+    if (headToOrigin) {
+      return robot.update(target.x, target.y, target.angle);
+    } else {
+      return robot.followPath(function(x) {
+        return 0.5 * Math.sin(x);
+      });
+    }
+  }, 1);
 
 }).call(this);

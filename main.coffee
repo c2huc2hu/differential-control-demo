@@ -29,7 +29,8 @@ class ControlledRobot extends Robot
     update: (goalX, goalY, goalTheta) ->
         # want to regulate rho, alpha and beta to zero.
         dist = Math.sqrt((@x-goalX)**2+(@y-goalY)**2) # rho
-        directionToGoal = Math.atan (goalY-@y) / (goalX-@x)
+        console.log dist if dist > 100
+        directionToGoal = Math.atan2 (goalY-@y), (goalX-@x)
         targetHeading = directionToGoal - @theta # alpha
         alignHeading = directionToGoal - goalTheta # beta
 
@@ -55,13 +56,9 @@ rect = new fabric.Rect({width:30, height: 20})
 eye = new fabric.Circle({left: target.x*100+200-10, top: target.y*100+200-10, radius: 10, fill: 'crimson'})
 eye2 = new fabric.Circle({left: target.x*100+200-5, top: target.y*100+200-5, radius: 5, fill: 'black'})
 canvas.add(rect, eye, eye2)
-robot = new ControlledRobot(L, rect, 5, 0.1, 0.1)
+robot = new ControlledRobot(L, rect, 5, 0.2, 0.1)
 
 setInterval ->
-    if headToOrigin
-        robot.update(target.x, target.y, target.angle)
-    else
-        robot.followPath (x) -> 0.5 * Math.sin(x)
     robot.render()
 , 16
 
@@ -69,3 +66,10 @@ $('#reset').click -> robot.randomizePosition()
 $('#toggle').click -> window.headToOrigin = not window.headToOrigin
 
 window.robot = robot
+
+setInterval ->
+    if headToOrigin
+        robot.update(target.x, target.y, target.angle)
+    else
+        robot.followPath (x) -> 0.5 * Math.sin(x)
+, 1
