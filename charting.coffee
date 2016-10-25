@@ -5,19 +5,22 @@ console.log "charting"
 ctx = $('#chart').get(0).getContext('2d')
 window.ctx = ctx
 
-setPixelBlack = do ->
-    imageData = ctx.createImageData(1, 1)
-    d = imageData.data
-    d[0] = d[1] = d[2] = 80
-    (x, y) ->
-        console.log x, y
-        ctx.putImageData(imageData, x, y)
-
 updateChart = (data) ->
-    console.log w
+    ctx.beginPath()
+    ctx.fillStyle = 'black'
     for i in data
         ctx.rect i.x * 100 + 200, i.y * 100 + 200, 1, 1
     ctx.fill()
+
+plot = (fcn) ->
+    ctx.beginPath()
+    ctx.fillStyle = 'red'
+    for x in [0..400]
+        y = fcn(x / 100 - 2) * 100 + 200
+        ctx.rect x, y, 1, 1
+    ctx.fill()
+
+plot (x) -> 0.5 * Math.sin x
 
 setInterval ->
     console.log window.robot.history.length

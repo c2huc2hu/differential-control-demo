@@ -1,5 +1,6 @@
 h = 0.001
 L = 0.1
+window.headToOrigin = true
 
 class Robot
     constructor: (@L, @canvasObj) ->
@@ -10,7 +11,6 @@ class Robot
         @y = Math.random() * 4 - 2
         @theta = Math.random() * 2 * Math.PI
     update: (speed, angle) ->
-        # console.log @x, @y, @theta
         @x += speed * Math.cos(@theta) * h
         @y += speed * Math.sin(@theta) * h
         @theta += angle
@@ -35,6 +35,12 @@ class ControlledRobot extends Robot
 
         @history.push {@x, @y, @theta}
         super @distControl * dist, @targetControl * targetHeading + @alignControl * alignHeading
+    followPath: (pathFcn) ->
+        anticipation = 0.1 # how much to trail the target point
+        desiredX = @x + anticipation
+        desiredY = pathFcn(desiredX)
+        desiredTheta = Math.atan2 (desiredY - @y), (desiredX - @x)
+        @update desiredX, desiredY, desiredTheta
 
 canvas = new fabric.Canvas('cvs')
     .setHeight 400
@@ -52,10 +58,14 @@ canvas.add(rect, eye, eye2)
 robot = new ControlledRobot(L, rect, 5, 0.1, 0.1)
 
 setInterval ->
-    robot.update(target.x, target.y, target.angle)
+    if headToOrigin
+        robot.update(target.x, target.y, target.angle)
+    else
+        robot.followPath (x) -> 0.5 * Math.sin(x)
     robot.render()
 , 16
 
 $('#reset').click -> robot.randomizePosition()
+$('#toggle').click -> window.headToOrigin = not window.headToOrigin
 
 window.robot = robot

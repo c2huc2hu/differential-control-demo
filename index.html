@@ -1,7 +1,5 @@
-<script src="./lib/jquery-3.1.1.slim.min.js"></script><script src="./lib/fabric.js"></script><script src="./lib/highcharts.js"></script><style>canvas {
+<script src="./lib/jquery-3.1.1.slim.min.js"></script><script src="./lib/fabric.js"></script><style>.drawing > * {
     border: solid 1px black;
-    /* width: 400px;
-    height: 400px; */
     display: inline-block;
 }
-</style><h1>Problem 2: Modelling a differentially steered robot</h1><canvas id="cvs"></canvas><canvas id="chart" width="400" height="400"></canvas><button id="reset">Randomize</button><script src="./main.js"></script><script src="./charting.js"></script>
+</style><h1>Problem 2: Modelling a differentially steered robot</h1><div class="drawing"><canvas id="cvs"></canvas><canvas id="chart" width="400" height="400"></canvas></div><button id="reset">Randomize</button><button id="toggle">Head to origin/ follow path</button><script src="./main.js"></script><script src="./charting.js"></script>

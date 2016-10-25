@@ -8,6 +8,8 @@
 
   L = 0.1;
 
+  window.headToOrigin = true;
+
   Robot = (function() {
     function Robot(L1, canvasObj) {
       this.L = L1;
@@ -72,6 +74,15 @@
       return ControlledRobot.__super__.update.call(this, this.distControl * dist, this.targetControl * targetHeading + this.alignControl * alignHeading);
     };
 
+    ControlledRobot.prototype.followPath = function(pathFcn) {
+      var anticipation, desiredTheta, desiredX, desiredY;
+      anticipation = 0.1;
+      desiredX = this.x + anticipation;
+      desiredY = pathFcn(desiredX);
+      desiredTheta = Math.atan2(desiredY - this.y, desiredX - this.x);
+      return this.update(desiredX, desiredY, desiredTheta);
+    };
+
     return ControlledRobot;
 
   })(Robot);
@@ -108,12 +119,22 @@
   robot = new ControlledRobot(L, rect, 5, 0.1, 0.1);
 
   setInterval(function() {
-    robot.update(target.x, target.y, target.angle);
+    if (headToOrigin) {
+      robot.update(target.x, target.y, target.angle);
+    } else {
+      robot.followPath(function(x) {
+        return 0.5 * Math.sin(x);
+      });
+    }
     return robot.render();
   }, 16);
 
   $('#reset').click(function() {
     return robot.randomizePosition();
+  });
+
+  $('#toggle').click(function() {
+    return window.headToOrigin = !window.headToOrigin;
   });
 
   window.robot = robot;
